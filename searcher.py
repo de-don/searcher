@@ -41,9 +41,10 @@ def sort_out(arr, opt_s, opt_o):
 
     counts = sorted(Counter(arr).items(), key=sort_key, reverse=rev)
 
-    return list(map(itemgetter(0), counts))
-    # if need return with repetitions:
-    # return sum([[i[0]] * i[1] for i in counts], [])
+    # if not need return repetitions:
+    # return list(map(itemgetter(0), counts))
+
+    return sum([[i[0]] * i[1] for i in counts], [])
 
 
 @click.command()
@@ -80,7 +81,7 @@ def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o, opt_n):
     # sorting output
     if opt_s:
         out = sort_out(out, opt_s, opt_o)
-    
+
     # slice of output
     if opt_n:
         out = out[:opt_n]

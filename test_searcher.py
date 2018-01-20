@@ -78,7 +78,7 @@ def test_searcher_sort():
 
     # test opt_s == 'freq'
     inp = ["a", "b", "b", "a", "c", "b"]
-    out = ["c", "a", "b"]
+    out = ["c", "a", "a", "b", "b", "b"]
 
     result = runner.invoke(searcher, ['-s', 'freq', '-o', 'asc', '\w+'], input=to_lines(*inp))
     assert check_output(result, out)
