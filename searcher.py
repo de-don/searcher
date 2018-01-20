@@ -47,6 +47,27 @@ def sort_out(arr, opt_s, opt_o):
     return sum([[i[0]] * i[1] for i in counts], [])
 
 
+def show_stat(arr, stat):
+
+    counter = Counter(arr)
+    max_len = max(map(len, counter.keys()))
+
+    fmt = "{:<%d} | {:<10}" % max_len
+
+    items = sorted(counter.items(), key=itemgetter(1), reverse=True)
+    # select title column and n (len array for formula Mi/n)
+    if stat == "count":
+        click.echo(fmt.format("Substr", "Count"))
+        for k, v in items:
+            click.echo(fmt.format(k, v))
+    else:
+        click.echo(fmt.format("Substr", "Frequency"))
+        n = sum(counter.values())
+        for k, v in items:
+            click.echo(fmt.format(k, v/n))
+
+
+
 @click.command()
 @click.argument('pattern')
 @click.argument('filename', type=click.Path(exists=True), required=False)
@@ -58,7 +79,9 @@ def sort_out(arr, opt_s, opt_o):
 @click.option('-o', 'opt_o', type=click.Choice(['asc', 'desc']), default="asc",
               help="Sorting order can be specified (ascending, descending).")
 @click.option('-n', 'opt_n', default=None, help="List first N matches.", type=int)
-def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o, opt_n):
+@click.option('--stat', 'stat', type=click.Choice(['count', 'freq']),
+              help="List unique matches with statistic (count or frequency in percents).")
+def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o, opt_n, stat):
     text = get_text(filename)
     find_in_lines = parse(text, pattern)
 
@@ -70,6 +93,11 @@ def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o, opt_n):
 
     # convert array with lines to simple array
     out = sum(find_in_lines, [])
+
+    # show statictics
+    if stat:
+        show_stat(out, stat)
+        return
 
     if flag_u:
         out = unique(out)
