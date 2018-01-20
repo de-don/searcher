@@ -1,0 +1,7 @@
+de-don@mail.ru
+same login de-don2@mail.ru
+same domain de-don@inbox.ru
+admin_site@google.ru after text
+nothing
+@only.domain
+without_domain@
