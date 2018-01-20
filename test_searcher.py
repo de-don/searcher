@@ -87,6 +87,19 @@ def test_searcher_sort():
     assert check_output(result, list(reversed(out)))
 
 
+def test_searcher_option_n():
+    inp = ["aa", "bb", "cc"]
+
+    result = runner.invoke(searcher, ['-n 2', '\w+'], input=to_lines(*inp))
+    assert check_output(result, ["aa", "bb"])
+
+    result = runner.invoke(searcher, ['-n 4', '\w+'], input=to_lines(*inp))
+    assert check_output(result, ["aa", "bb", "cc"])
+
+    result = runner.invoke(searcher, ['-n 1.5', '\w+'], input=to_lines(*inp))
+    assert result.exit_code == 2
+
+
 if __name__ == '__main__':
     test_searcher_input_stdin()
     test_searcher_input_file()
@@ -96,3 +109,4 @@ if __name__ == '__main__':
     test_searcher_flag_l()
 
     test_searcher_sort()
+    test_searcher_option_n()
