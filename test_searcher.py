@@ -9,6 +9,10 @@ def check_output(result, need):
     return out == need
 
 
+def to_lines(*args):
+    return "\n".join(args)
+
+
 # global runner
 runner = CliRunner()
 
@@ -31,6 +35,28 @@ def test_searcher_input_file():
     assert result.exit_code == 2
 
 
+def test_searcher_flag_u():
+    result = runner.invoke(searcher, ['-u', '\w+'], input=to_lines("one", "two", "two", "three", "one"))
+    assert check_output(result, ["one", "two", "three"])
+
+    result = runner.invoke(searcher, ['-u', '\w+'], input=to_lines("one", "two", "three"))
+    assert check_output(result, ["one", "two", "three"])
+
+
+def test_searcher_flag_c():
+    result = runner.invoke(searcher, ['-c', '\w+'], input=to_lines("one two", "three", ""))
+    assert result.output == "Total count of matches: 3\n"
+
+    result = runner.invoke(searcher, ['-c', '@\w+'], input=to_lines("one two", "three", ""))
+    assert result.output == "Total count of matches: 0\n"
+
+    result = runner.invoke(searcher, ['-c', '-u', '\w+'], input=to_lines("one two", "three", "one two", ""))
+    assert result.output == "Total count of matches: 3\n"
+
+
 if __name__ == '__main__':
     test_searcher_input_stdin()
     test_searcher_input_file()
+
+    test_searcher_flag_u()
+    test_searcher_flag_c()
