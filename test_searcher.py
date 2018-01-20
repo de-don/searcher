@@ -100,6 +100,22 @@ def test_searcher_option_n():
     assert result.exit_code == 2
 
 
+def test_searcher_stat():
+    inp = ["a", "b", "b", "a", "c", "b"]
+
+    result = runner.invoke(searcher, ['--stat', 'freq', '\w+'], input=to_lines(*inp))
+    assert check_output(result, ["Substr | Frequency ",
+                                 "b | 0.5       ",
+                                 "a | 0.3333333333333333",
+                                 "c | 0.16666666666666666"])
+
+    result = runner.invoke(searcher, ['--stat', 'count', '\w+'], input=to_lines(*inp))
+    assert check_output(result, ["Substr | Count     ",
+                                 "b | 3         ",
+                                 "a | 2         ",
+                                 "c | 1         "])
+
+
 if __name__ == '__main__':
     test_searcher_input_stdin()
     test_searcher_input_file()
@@ -110,3 +126,4 @@ if __name__ == '__main__':
 
     test_searcher_sort()
     test_searcher_option_n()
+    test_searcher_stat()
