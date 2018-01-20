@@ -54,9 +54,18 @@ def test_searcher_flag_c():
     assert result.output == "Total count of matches: 3\n"
 
 
+def test_searcher_flag_l():
+    result = runner.invoke(searcher, ['-l', '\w+'], input=to_lines("one", "two", "three"))
+    assert result.output == "Lines with matches: 3\n"
+
+    result = runner.invoke(searcher, ['-l', '\w+'], input=to_lines("one", "two three"))
+    assert result.output == "Lines with matches: 2\n"
+
+
 if __name__ == '__main__':
     test_searcher_input_stdin()
     test_searcher_input_file()
 
     test_searcher_flag_u()
     test_searcher_flag_c()
+    test_searcher_flag_l()

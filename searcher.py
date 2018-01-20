@@ -37,9 +37,16 @@ def unique(arr):
 @click.argument('filename', type=click.Path(exists=True), required=False)
 @click.option('-u', 'flag_u', is_flag=True, help='List unique matches only.')
 @click.option('-c', 'flag_c', is_flag=True, help='Total count of found matches.')
-def searcher(pattern, filename, flag_u, flag_c):
+@click.option('-l', 'flag_l', is_flag=True, help='Total count of lines, where at least one match was found.')
+def searcher(pattern, filename, flag_u, flag_c, flag_l):
     text = get_text(filename)
     find_in_lines = parse(text, pattern)
+
+    if flag_l:
+        # calculate count not empty arrays
+        count = len(list(filter(None, find_in_lines)))
+        click.echo("Lines with matches: %d" % count)
+        return
 
     # convert array with lines to simple array
     out = sum(find_in_lines, [])
