@@ -1,4 +1,7 @@
 import re
+from operator import itemgetter
+from collections import Counter
+
 import click
 
 
@@ -32,13 +35,28 @@ def unique(arr):
     return [x for x in arr if not (x in s or add(x))]
 
 
+def sort_out(arr, opt_s, opt_o):
+    sort_key = itemgetter(int(opt_s == "freq"))
+    rev = opt_o == "desc"
+
+    counts = sorted(Counter(arr).items(), key=sort_key, reverse=rev)
+
+    return list(map(itemgetter(0), counts))
+    # if need return with repetitions:
+    # return sum([[i[0]] * i[1] for i in counts], [])
+
+
 @click.command()
 @click.argument('pattern')
 @click.argument('filename', type=click.Path(exists=True), required=False)
 @click.option('-u', 'flag_u', is_flag=True, help='List unique matches only.')
 @click.option('-c', 'flag_c', is_flag=True, help='Total count of found matches.')
 @click.option('-l', 'flag_l', is_flag=True, help='Total count of lines, where at least one match was found.')
-def searcher(pattern, filename, flag_u, flag_c, flag_l):
+@click.option('-s', 'opt_s', type=click.Choice(['freq', 'abc']),
+              help='Sorting of found matches by alphabet and frequency (related to all found matches).')
+@click.option('-o', 'opt_o', type=click.Choice(['asc', 'desc']), default="asc",
+              help="Sorting order can be specified (ascending, descending).")
+def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o):
     text = get_text(filename)
     find_in_lines = parse(text, pattern)
 
@@ -57,6 +75,10 @@ def searcher(pattern, filename, flag_u, flag_c, flag_l):
     if flag_c:
         click.echo("Total count of matches: %d" % len(out))
         return
+
+    # sorting output
+    if opt_s:
+        out = sort_out(out, opt_s, opt_o)
 
     click.echo("\n".join(out))
 

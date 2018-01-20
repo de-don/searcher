@@ -62,6 +62,31 @@ def test_searcher_flag_l():
     assert result.output == "Lines with matches: 2\n"
 
 
+def test_searcher_sort():
+    # test opt_s == 'abc'
+    inp = ["abb", "bbb", "aaa", "ccc"]
+    out = ["aaa", "abb", "bbb", "ccc"]
+
+    result = runner.invoke(searcher, ['-s', 'abc', '\w+'], input=to_lines(*inp))
+    assert check_output(result, out)
+
+    result = runner.invoke(searcher, ['-s', 'abc', '-o', 'asc', '\w+'], input=to_lines(*inp))
+    assert check_output(result, out)
+
+    result = runner.invoke(searcher, ['-s', 'abc', '-o', 'desc', '\w+'], input=to_lines(*inp))
+    assert check_output(result, list(reversed(out)))
+
+    # test opt_s == 'freq'
+    inp = ["a", "b", "b", "a", "c", "b"]
+    out = ["c", "a", "b"]
+
+    result = runner.invoke(searcher, ['-s', 'freq', '-o', 'asc', '\w+'], input=to_lines(*inp))
+    assert check_output(result, out)
+
+    result = runner.invoke(searcher, ['-s', 'freq', '-o', 'desc', '\w+'], input=to_lines(*inp))
+    assert check_output(result, list(reversed(out)))
+
+
 if __name__ == '__main__':
     test_searcher_input_stdin()
     test_searcher_input_file()
@@ -69,3 +94,5 @@ if __name__ == '__main__':
     test_searcher_flag_u()
     test_searcher_flag_c()
     test_searcher_flag_l()
+
+    test_searcher_sort()
