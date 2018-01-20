@@ -32,7 +32,8 @@ def searcher(pattern, filename):
     text = get_text(filename)
     find_in_lines = parse(text, pattern)
 
-    click.echo("\n".join(find_in_lines))
+    out = sum(find_in_lines, [])
+    click.echo("\n".join(out))
 
 
 if __name__ == '__main__':
