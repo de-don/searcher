@@ -48,7 +48,6 @@ def sort_out(arr, opt_s, opt_o):
 
 
 def show_stat(arr, stat):
-
     counter = Counter(arr)
     max_len = max(map(len, counter.keys()))
 
@@ -64,8 +63,7 @@ def show_stat(arr, stat):
         click.echo(fmt.format("Substr", "Frequency"))
         n = sum(counter.values())
         for k, v in items:
-            click.echo(fmt.format(k, v/n))
-
+            click.echo(fmt.format(k, v / n))
 
 
 @click.command()
