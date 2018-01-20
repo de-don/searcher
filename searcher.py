@@ -51,16 +51,18 @@ def show_stat(arr, stat):
     counter = Counter(arr)
     max_len = max(map(len, counter.keys()))
 
-    fmt = "{:<%d} | {:<10}" % max_len
+    fmt_title = "{:<%d} | {}" % max_len
 
     items = sorted(counter.items(), key=itemgetter(1), reverse=True)
     # select title column and n (len array for formula Mi/n)
     if stat == "count":
-        click.echo(fmt.format("Substr", "Count"))
+        fmt = "{:<%d} | {}" % max_len
+        click.echo(fmt_title.format("Substr", "Count"))
         for k, v in items:
             click.echo(fmt.format(k, v))
     else:
-        click.echo(fmt.format("Substr", "Frequency"))
+        fmt = "{:<%d} | {:.3f}" % max_len
+        click.echo(fmt_title.format("Substr", "Frequency"))
         n = sum(counter.values())
         for k, v in items:
             click.echo(fmt.format(k, v / n))
