@@ -56,7 +56,8 @@ def sort_out(arr, opt_s, opt_o):
               help='Sorting of found matches by alphabet and frequency (related to all found matches).')
 @click.option('-o', 'opt_o', type=click.Choice(['asc', 'desc']), default="asc",
               help="Sorting order can be specified (ascending, descending).")
-def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o):
+@click.option('-n', 'opt_n', default=None, help="List first N matches.", type=int)
+def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o, opt_n):
     text = get_text(filename)
     find_in_lines = parse(text, pattern)
 
@@ -79,6 +80,10 @@ def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o):
     # sorting output
     if opt_s:
         out = sort_out(out, opt_s, opt_o)
+    
+    # slice of output
+    if opt_n:
+        out = out[:opt_n]
 
     click.echo("\n".join(out))
 
