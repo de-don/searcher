@@ -105,11 +105,23 @@ def test_searcher_stat():
 
     result = runner.invoke(searcher, ['--stat', 'freq', '\w+'], input=to_lines(*inp))
     assert check_output(result, ["Substr | Frequency",
-                                 "b | 0.500",
                                  "a | 0.333",
+                                 "b | 0.500",
                                  "c | 0.167"])
 
     result = runner.invoke(searcher, ['--stat', 'count', '\w+'], input=to_lines(*inp))
+    assert check_output(result, ["Substr | Count",
+                                 "a | 2",
+                                 "b | 3",
+                                 "c | 1"])
+
+    result = runner.invoke(searcher, ['-s', 'freq', '--stat', 'count', '\w+'], input=to_lines(*inp))
+    assert check_output(result, ["Substr | Count",
+                                 "c | 1",
+                                 "a | 2",
+                                 "b | 3"])
+
+    result = runner.invoke(searcher, ['-s', 'freq', '-o', 'desc', '--stat', 'count', '\w+'], input=to_lines(*inp))
     assert check_output(result, ["Substr | Count",
                                  "b | 3",
                                  "a | 2",
