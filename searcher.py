@@ -1,8 +1,6 @@
-import re
-from operator import itemgetter
-from collections import Counter
-
 import click
+
+from Matches import Matches
 
 
 def get_text(filename):
@@ -17,54 +15,21 @@ def get_text(filename):
     return stream.read()
 
 
-def parse(text, pattern):
-    result_lines = []
-
-    # Find all matches in each line
-    for line in text.splitlines():
-        result = re.findall(pattern, line)
-        result_lines.append(result)
-
-    return result_lines
-
-
-def unique(arr):
-    ''' Create new array with unique items with save ordering. '''
-    s = set()
-    add = s.add
-    return [x for x in arr if not (x in s or add(x))]
-
-
-def sort_out(arr, opt_s, opt_o):
-    sort_key = itemgetter(int(opt_s == "freq"))
-    rev = opt_o == "desc"
-
-    counts = sorted(Counter(arr).items(), key=sort_key, reverse=rev)
-
-    # if not need return repetitions:
-    # return list(map(itemgetter(0), counts))
-
-    return sum([[i[0]] * i[1] for i in counts], [])
-
-
-def show_stat(arr, stat):
-    counter = Counter(arr)
-    max_len = max(map(len, counter.keys()))
-
+def show_stat(matches, stat):
+    max_len = len(max(matches.keys, key=len))
     fmt_title = "{:<%d} | {}" % max_len
 
-    items = sorted(counter.items(), key=itemgetter(1), reverse=True)
     # select title column and n (len array for formula Mi/n)
     if stat == "count":
         fmt = "{:<%d} | {}" % max_len
         click.echo(fmt_title.format("Substr", "Count"))
-        for k, v in items:
+        for k, v in matches:
             click.echo(fmt.format(k, v))
     else:
         fmt = "{:<%d} | {:.3f}" % max_len
         click.echo(fmt_title.format("Substr", "Frequency"))
-        n = sum(counter.values())
-        for k, v in items:
+        n = matches.count_matches
+        for k, v in matches:
             click.echo(fmt.format(k, v / n))
 
 
@@ -83,38 +48,38 @@ def show_stat(arr, stat):
               help="List unique matches with statistic (count or frequency in percents).")
 def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o, opt_n, stat):
     text = get_text(filename)
-    find_in_lines = parse(text, pattern)
+
+    matches = Matches(pattern, text)
 
     if flag_l:
-        # calculate count not empty arrays
-        count = len(list(filter(None, find_in_lines)))
+        count = matches.count_lines
         click.echo("Lines with matches: %d" % count)
         return
 
-    # convert array with lines to simple array
-    out = sum(find_in_lines, [])
+    # sort
+    if opt_s:
+        matches.sort(opt_s, opt_o)
+
+    if flag_u:
+        matches.unique()
+
+    if flag_c:
+        count = matches.count_matches
+        click.echo("Total count of matches: %d" % count)
+        return
 
     # show statictics
     if stat:
-        show_stat(out, stat)
+        show_stat(matches, stat)
         return
-
-    if flag_u:
-        out = unique(out)
-
-    if flag_c:
-        click.echo("Total count of matches: %d" % len(out))
-        return
-
-    # sorting output
-    if opt_s:
-        out = sort_out(out, opt_s, opt_o)
 
     # slice of output
     if opt_n:
-        out = out[:opt_n]
+        matches.slice(opt_n)
 
-    click.echo("\n".join(out))
+    # List results
+    for line in matches.print_items():
+        click.echo(line)
 
 
 if __name__ == '__main__':
