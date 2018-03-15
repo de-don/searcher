@@ -149,6 +149,7 @@ def get_matches(strings_iter, pattern):
 def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o, opt_n, stat):
     stream = get_file_or_stdin_stream(filename)
     matches, lines_with_matches = get_matches(stream, pattern)
+    stream.close()
 
     if flag_l:
         click.echo(f'Lines with matches: {lines_with_matches}')
