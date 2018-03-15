@@ -5,6 +5,18 @@ from operator import itemgetter
 
 import click
 
+HELP_TEXTS = {
+    'u': 'List unique matches only.',
+    'c': 'Total count of found matches.',
+    'l': 'Total count of lines, where at least one match was found.',
+    's': 'Sorting of found matches by alphabet and frequency '
+         '(related to all found matches).',
+    'o': 'Sorting order can be specified (ascending, descending).',
+    'n': 'List first N matches.',
+    'stat': 'List unique matches with statistic count or frequency '
+            'in percents).'
+}
+
 
 def get_file_or_stdin_stream(filename=None):
     """ Function to get file stream, if file exists, else get stdin stream.
@@ -40,38 +52,37 @@ def show_stat(matches, method):
 
     max_len = max(map(len, map(itemgetter(0), matches)))
     fmt_title = '{:<%d} | {}' % max_len
-    lines = []
+
     # select title column and n (len array for formula Mi/n)
     if method == 'count':
         fmt_row = '{:<%d} | {}' % max_len
-        lines.append(fmt_title.format('Substr', 'Count'))
+        yield fmt_title.format('Substr', 'Count')
         for k, v in matches:
-            lines.append(fmt_row.format(k, v))
+            yield fmt_row.format(k, v)
 
     elif method == 'freq':
         fmt_row = '{:<%d} | {:.3f}' % max_len
-        lines.append(fmt_title.format('Substr', 'Frequency'))
+        yield fmt_title.format('Substr', 'Frequency')
         n = sum(map(itemgetter(1), matches))
         for k, v in matches:
-            lines.append(fmt_row.format(k, v / n))
+            yield fmt_row.format(k, v / n)
 
     else:
-        lines.append(f'Not supported method to calculate statistic: {method}.')
-
-    return '\n'.join(lines)
+        yield f'Not supported method to calculate statistic: {method}.'
 
 
-HELP_TEXTS = {
-    'u': 'List unique matches only.',
-    'c': 'Total count of found matches.',
-    'l': 'Total count of lines, where at least one match was found.',
-    's': 'Sorting of found matches by alphabet and frequency '
-         '(related to all found matches).',
-    'o': 'Sorting order can be specified (ascending, descending).',
-    'n': 'List first N matches.',
-    'stat': 'List unique matches with statistic count or frequency '
-            'in percents).'
-}
+def get_matches(iter, pattern):
+    # getting matches and save it's in counter
+    matches_counter = Counter()
+    lines_with_matches = 0
+
+    for line in iter:
+        result = re.findall(pattern, line)
+        if result:
+            lines_with_matches += 1
+            matches_counter.update(result)
+
+    return matches_counter.items(), lines_with_matches
 
 
 @click.command()
@@ -126,32 +137,20 @@ HELP_TEXTS = {
     help=HELP_TEXTS['stat']
 )
 def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o, opt_n, stat):
-
     stream = get_file_or_stdin_stream(filename)
-
-    # getting matches and save it's in counter
-    matches_counter = Counter()
-    lines_with_matches = 0
-
-    for line in stream:
-        result = re.findall(pattern, line)
-        if result:
-            lines_with_matches += 1
-            matches_counter.update(result)
-
-    matches = matches_counter.items()
-    del matches_counter
+    matches, lines_with_matches = get_matches(stream, pattern)
 
     if flag_l:
         click.echo(f'Lines with matches: {lines_with_matches}')
         return
 
-    # sort
     if opt_s:
+        # sorting matches by `opt_s` and `opt_o` options
         key = itemgetter(opt_s == 'freq')
         matches = sorted(matches, key=key, reverse=(opt_o == 'desc'))
 
     if flag_u:
+        # set each match value=1
         matches = ((k, 1) for k, v in matches)
 
     if flag_c:
@@ -160,10 +159,11 @@ def searcher(pattern, filename, flag_u, flag_c, flag_l, opt_s, opt_o, opt_n, sta
         return
 
     if stat:
-        click.echo(show_stat(matches, stat))
+        for line in show_stat(matches, stat):
+            click.echo(line)
         return
 
-    # List results
+    # show results
     for k, v in islice(matches, opt_n):
         click.echo('\n'.join(repeat(k, v)))
 
