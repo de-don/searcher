@@ -4,7 +4,7 @@ from searcher import searcher
 
 
 def check_output(result, need):
-    ''' Function to compare result.output and need array '''
+    """ Function to compare result.output and need array """
     out = result.output.splitlines()
     return out == need
 
@@ -131,7 +131,6 @@ def test_searcher_stat():
 if __name__ == '__main__':
     test_searcher_input_stdin()
     test_searcher_input_file()
-
     test_searcher_flag_u()
     test_searcher_flag_c()
     test_searcher_flag_l()
