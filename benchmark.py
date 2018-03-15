@@ -3,6 +3,7 @@ from memory_profiler import profile
 from time import perf_counter
 
 from searcher import searcher
+#from v2.searcher import searcher
 
 
 # global runner
