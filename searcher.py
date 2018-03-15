@@ -1,6 +1,6 @@
 import re
 from collections import Counter
-from itertools import repeat, islice
+from itertools import islice, repeat
 from operator import itemgetter
 
 import click
@@ -71,12 +71,22 @@ def show_stat(matches, method):
         yield f'Not supported method to calculate statistic: {method}.'
 
 
-def get_matches(iter, pattern):
+def get_matches(strings_iter, pattern):
+    """ Find matchis by pattern in each string which return iter.
+
+    Args:
+        strings_iter(iter): iter of strings
+        pattern(str): regular expression for search
+
+    Returns:
+        List(tuple): list of pairs (unique_match, count)
+
+    """
     # getting matches and save it's in counter
     matches_counter = Counter()
     lines_with_matches = 0
 
-    for line in iter:
+    for line in strings_iter:
         result = re.findall(pattern, line)
         if result:
             lines_with_matches += 1
